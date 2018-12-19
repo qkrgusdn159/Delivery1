@@ -65,5 +65,5 @@
         android:layout_marginLeft="20dp"
         android:layout_marginRight="20dp"
         android:layout_weight="0"
-        android:text="Button" />
+        android:text="상품등록" />
 </LinearLayout>

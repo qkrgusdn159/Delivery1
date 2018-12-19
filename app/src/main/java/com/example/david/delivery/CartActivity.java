@@ -31,7 +31,7 @@ import model.OrderModel;
 
 public class CartActivity extends AppCompatActivity {
 
-    public static TextView textView_total_price, avilable_mileage;
+    public static TextView textView_total_price, available_mileage;
     public static Button order;
     EditText use_mileage;
     DatabaseReference mCurrentOrder, mCurrentMileage, mOrderList, mOrder;
@@ -52,9 +52,23 @@ public class CartActivity extends AppCompatActivity {
         mCurrentOrder = FirebaseDatabase.getInstance().getReference().child("users").child(FirebaseAuth.getInstance().getUid()).child("cart");
         mOrderList = FirebaseDatabase.getInstance().getReference().child("users").child(FirebaseAuth.getInstance().getUid()).child("Order");
 
-        avilable_mileage = findViewById(R.id.textView_available_mileage);
+        available_mileage = findViewById(R.id.textView_available_mileage);
         use_mileage = findViewById(R.id.editText_use_mileage);
         use_mileage.setText("0");
+
+
+        mCurrentMileage.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                user_mileage = Integer.parseInt(dataSnapshot.getValue(String.class));
+                available_mileage.setText(String.valueOf(user_mileage));
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         mCurrentOrder.addValueEventListener(new ValueEventListener() {
             @Override
@@ -101,18 +115,6 @@ public class CartActivity extends AppCompatActivity {
                         total_price = Integer.parseInt(textView_total_price.getText().toString());
                         mileage = Integer.parseInt(use_mileage.getText().toString());
 
-                        mCurrentMileage.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                user_mileage = Integer.parseInt(dataSnapshot.getValue(String.class));
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-
                         if(total_price == 0){
                             Toast.makeText(getApplicationContext(),"장바구니에 상품이 없습니다.",Toast.LENGTH_LONG).show();
                         }else if(user_mileage < mileage){
@@ -124,8 +126,8 @@ public class CartActivity extends AppCompatActivity {
                             orderModel = new OrderModel(getTime(), String.valueOf(total_price), String.valueOf(mileage), String.valueOf(total_price - mileage), "현금결제");
                             mOrder = mOrderList.push();
                             mOrder.setValue(orderModel);
-
                             mCurrentMileage.setValue(String.valueOf(user_mileage - mileage + Integer.parseInt(orderModel.total_pay) * 0.1)); // 총 결제 금액의 10퍼센트를 마일리지로 적립
+
                             for(int i=0; i < cartModels.size(); i++){
                                 mOrder.child("list").child(pids.get(i)).setValue(cartModels.get(i));
                             }
@@ -142,18 +144,6 @@ public class CartActivity extends AppCompatActivity {
                         total_price = Integer.parseInt(textView_total_price.getText().toString());
                         mileage = Integer.parseInt(use_mileage.getText().toString());
 
-                        mCurrentMileage.addValueEventListener(new ValueEventListener() {
-                            @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                user_mileage = Integer.parseInt(dataSnapshot.getValue(String.class));
-                            }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
-                        });
-
                         if(total_price == 0){
                             Toast.makeText(getApplicationContext(),"장바구니에 상품이 없습니다.",Toast.LENGTH_LONG).show();
                         }else if(user_mileage < mileage){
@@ -166,6 +156,7 @@ public class CartActivity extends AppCompatActivity {
                             orderModel = new OrderModel(getTime(), String.valueOf(total_price), String.valueOf(mileage), String.valueOf(total_price - mileage), "카드결제");
                             mOrder = mOrderList.push();
                             mOrder.setValue(orderModel);
+                            mCurrentMileage.setValue(String.valueOf(user_mileage - mileage + Integer.parseInt(orderModel.total_pay) * 0.1)); // 총 결제 금액의 10퍼센트를 마일리지로 적립
 
                             for(int i=0; i < cartModels.size(); i++){
                                 mOrder.child("list").child(pids.get(i)).setValue(cartModels.get(i));
